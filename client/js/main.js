@@ -18,20 +18,20 @@ $(document).ready(function() {
 			$("#console").addClass("extended");
 		}
 		consoleShown = !consoleShown;
-	});
-	
+    });
+
 	const responseTimeout = 10000;
 	let bootstrapState = 0;
-	
+
 
 
 	let apiInfo = {
-		url: "ws://localhost:2019",
-		timeout: 10000,
+		url: 'ws://192.168.1.7:2019', // TODO: Read from a config maybe
+ 		timeout: 10000,
 		errors: {
 			basic: {
-				timeout: "Timeout",
-				invalidResponse: "Invalid response"
+				timeout: 'Timeout',
+				invalidResponse: 'Invalid response'
 			}
 		}
 	};
@@ -59,7 +59,7 @@ $(document).ready(function() {
 			$("#bootstrap-container").addClass("hidden");
 			$("#main-container").removeClass("hidden");
 			$("#button-disconnect").html("Disconnect").attr("disabled", false);
-		},
+        },
 		steps: [
 			new BootstrapStep({
 				websocket: apiWebsocket,
@@ -159,7 +159,8 @@ $(document).ready(function() {
 								<td class="fill no-monospace"><button class="btn">View</button></td>
 							</tr>*/
 
-							let d = whatsAppMessage.data;
+                            let d = whatsAppMessage.data;
+                            console.log('whatsappMessage', d);
 							let viewJSONButton = $("<button></button>").addClass("btn").html("View").click(function() {
 								let messageIndex = parseInt($(this).parent().parent().attr("data-message-index"));
 								let jsonData = allWhatsAppMessages[messageIndex];
@@ -171,12 +172,12 @@ $(document).ready(function() {
 									jsonTree.create(jsonData, dialog.find(".bootbox-body").empty()[0]);
 								});
 							});
-							
+
 							let tableRow = $("<tr></tr>").attr("data-message-index", allWhatsAppMessages.length);
 							tableRow.append($("<th></th>").attr("scope", "row").html(allWhatsAppMessages.length+1));
 							tableRow.append($("<td></td>").html(moment.unix(d.timestamp/1000.0).format("ddd, DD.MM.YYYY, HH:mm:ss.SSS")));
 							tableRow.append($("<td></td>").html(d.message_type));
-							tableRow.append($("<td></td>").addClass("fill no-monospace").append(viewJSONButton));
+                            tableRow.append($("<td></td>").addClass("fill no-monospace").append(viewJSONButton));
 							$("#messages-list-table-body").append(tableRow);
 							allWhatsAppMessages.push(d.message);
 
@@ -209,7 +210,7 @@ $(document).ready(function() {
 	$("#button-disconnect").click(function() {
 		if(!apiWebsocket.backendConnectedToWhatsApp)
 			return;
-		
+
 		$(this).attr("disabled", true).html("Disconnecting...");
 		new BootstrapStep({
 			websocket: apiWebsocket,
@@ -223,5 +224,24 @@ $(document).ready(function() {
 			apiWebsocket.backendConnectedToWhatsApp = false;
 			$(this).html("Disconnected.");
 		}).catch(reason => $(this).html(`Disconnecting failed: ${reason}. Click to try again.`).attr("disabled", false));
-	});
+    });
+
+    $("#button-send-message").click(function() {
+        if(!apiWebsocket.backendConnectedToWhatsApp) {
+            return;
+        }
+        $(this).html('Sending message to user');
+        // TODO: Get the number of user and the text message to be sent
+        new BootstrapStep({
+            websocket: apiWebsocket,
+            request: {
+                type: "call",
+                callArgs: { command: "backend-sendTextMessage", number: "918660162298", text: "Hello there!"}
+            }
+        }).run(apiInfo.timeout)
+        .then(() => {
+            console.log('Message sent');
+            $(this).html("Message Sent");
+        }).catch(reason => $(this).html('Message not sent'))
+    })
 });

@@ -6,20 +6,23 @@ let express = require("express");
 let WebSocket = require("ws");
 let app = express();
 
-let {WebSocketClient} = require("./client/js/WebSocketClient.js");
-let {BootstrapStep}   = require("./client/js/BootstrapStep.js");
+let { WebSocketClient }  = require("./client/js/WebSocketClient.js");
+let { BootstrapStep }   = require("./client/js/BootstrapStep.js");
 
 
 
-let wss = new WebSocket.Server({ port: 2019 });
 console.log("whatsapp-web-reveng API server listening on port 2019");
 
 let backendInfo = {
-	url: "ws://localhost:2020",
+	url: "ws://192.168.1.7:2020",
 	timeout: 10000
 };
 
-wss.on("connection", function(clientWebsocketRaw, req) {
+const connections = []
+function createConnection() {
+    console.log("Creating new connection", connections.length)
+    let wss = new WebSocket.Server({port: 2019});
+    wss.on("connection", function(clientWebsocketRaw, req) {
 	let backendWebsocket = new WebSocketClient();
 	let clientWebsocket = new WebSocketClient().initializeFromRaw(clientWebsocketRaw, "api2client", {getOnMessageData: msg => new StringDecoder("utf-8").write(msg.data)});
 	clientWebsocket.send({ type: "connected" });
@@ -102,6 +105,27 @@ wss.on("connection", function(clientWebsocketRaw, req) {
 		});
 	}).run();
 
+    clientWebsocket.waitForMessage({
+        condition: obj => obj.from =="client" && obj.type == "call" && obj.command == "backend-sendTextMessage",
+        keepWhenHit: true,
+    }).then(clientCallRequest => {
+        console.log('Comming here');
+        if(!backendWebsocket.isOpen) {
+            clientCallRequest.respond({ type: 'error', reason: 'No backend connected' });
+            return;
+        }
+        new BootstrapStep({
+            websocket: backendWebsocket,
+            request: {
+                type: 'call',
+                callArgs: { command: 'backend-sendTextMessage', number: '917899663241', text: 'Hello there', whatsapp_instance_id: backendWebsocket.activeWhatsAppInstanceId }
+            }
+        }).run(backendInfo.timeout).then(backendResponse => {
+            clientCallRequest.respond({ type: "resource_disconnected", resource: "whatsapp" });
+        }).catch(reason => {
+            clientCallRequest.respond({ type: "error", reason: reason });
+        });
+    }).run();
 	clientWebsocket.waitForMessage({
 		condition: obj => obj.from == "client"  &&  obj.type == "call"  &&  obj.command == "backend-generateQRCode",
 		keepWhenHit: true
@@ -169,7 +193,7 @@ wss.on("connection", function(clientWebsocketRaw, req) {
 
 		switch(obj.command) {
 			case "api-connectBackend": {*/
-				
+
 
 				//backendWebsocket = new WebSocketClient("ws://localhost:2020", true);
 				//backendWebsocket.onClose
@@ -202,9 +226,10 @@ wss.on("connection", function(clientWebsocketRaw, req) {
 			waBackend = undefined;
 		}*/
 	//});
-})
+    })
+}
 
-
+connections.push(createConnection());
 
 
 app.use(express.static("client"));
