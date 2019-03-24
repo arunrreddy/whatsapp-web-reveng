@@ -78,7 +78,7 @@ class WebSocketClient {
 
 	send(obj, tag) {
 		return new Promise((resolve, reject) => {
-			let msgTag = tag==undefined ? (+new Date()) : tag;
+			let msgTag = tag == undefined ? (+new Date()) : tag;
 			this.waitForMessage({
 				condition: (obj, tag) => tag == msgTag,
 				keepWhenHit: false

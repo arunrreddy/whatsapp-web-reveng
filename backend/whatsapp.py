@@ -4,7 +4,7 @@
 from whatsapp_binary_reader import whatsappReadBinary
 from whatsapp_binary_writer import whatsappWriteBinary
 from utilities import *
-from whatsapp_defines import WAWebMessageInfo, WAMetrics
+from whatsapp_defines import WAWebMessageInfo, WAMetrics, WAFlags
 import pyqrcode
 import curve25519
 import websocket
@@ -19,6 +19,7 @@ from time import sleep
 import io
 import json
 import datetime
+import calendar
 import time
 import math
 import base64
@@ -145,10 +146,15 @@ class WhatsAppWebClient:
 
     def onMessage(self, ws, message):
         try:
+            eprint('incoming message', message)
             messageSplit = message.split(",", 1)
+            eprint('message split', messageSplit)
             messageTag = messageSplit[0]
-            messageContent = messageSplit[1]
-
+            eprint('message tag', messageSplit[0])
+            if len(messageSplit) == 2:
+                messageContent = messageSplit[1]
+            else:
+                messageContent = ''
             if messageTag in self.messageQueue:											# when the server responds to a client's message
                 pend = self.messageQueue[messageTag]
                 if pend["desc"] == "_status":
@@ -200,6 +206,10 @@ class WhatsAppWebClient:
                         finally:
                             self.onMessageCallback["func"](processedData, self.onMessageCallback, {
                                                            "message_type": messageType})
+                    else:
+                        self.onMessageCallback["func"](message, self.onMessageCallback, {
+                            "message_type": "json"
+                        })
                 else:
                     self.onMessageCallback["func"](jsonObj, self.onMessageCallback, {
                                                    "message_type": "json"})
@@ -298,18 +308,21 @@ class WhatsAppWebClient:
 
     def sendTextMessage(self, number, text):
         eprint("Sending message to " + number)
-        messageId = "3EB0"+binascii.hexlify(Crypto.Random.get_random_bytes(8)).upper()
+        messageId = "3EB0" + \
+            binascii.hexlify(Crypto.Random.get_random_bytes(8)).upper()
         messageTag = str(getTimestamp())
         messageParams = {"key": {"fromMe": True, "remoteJid": number + "@s.whatsapp.net", "id": messageId},
-                        "messageTimestamp": getTimestamp(), "status": 1, "message": {"conversation": text}}
+                         "messageTimestamp": str(getTimestamp()), "status": 1, "message": {"conversation": text}}
         eprint("Message params", messageParams)
         msgData = ["action", {"type": "relay", "epoch": str(self.messageSentCount)}, [
             ["message", None, WAWebMessageInfo.encode(messageParams)]]]
         eprint("Message Data", msgData)
-        encryptedMessage = WhatsAppEncrypt(
-            self.loginInfo["key"]["encKey"], self.loginInfo["key"]["macKey"], whatsappWriteBinary(msgData))
+        finalCipher = AESEncrypt(
+            self.loginInfo["key"]["encKey"], whatsappWriteBinary(msgData))
+        finalHash = HmacSha256(self.loginInfo["key"]["macKey"], finalCipher)
+        eprint('flag', bytearray(to_bytes(WAFlags.IGNORE, 1)))
         payload = bytearray(messageId) + bytearray(",") + bytearray(
-            to_bytes(WAMetrics.MESSAGE, 1)) + bytearray([0x80]) + encryptedMessage
+            to_bytes(WAMetrics.MESSAGE, 1)) + bytearray(to_bytes(WAFlags.IGNORE, 1)) + finalHash + finalCipher
         self.messageSentCount = self.messageSentCount + 1
         self.messageQueue[messageId] = {"desc": "__sending"}
         self.activeWs.send(payload, websocket.ABNF.OPCODE_BINARY)

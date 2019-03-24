@@ -160,7 +160,7 @@ $(document).ready(function() {
 							</tr>*/
 
                             let d = whatsAppMessage.data;
-                            console.log('whatsappMessage', d);
+                            console.log('whatsappMessage', whatsAppMessage);
 							let viewJSONButton = $("<button></button>").addClass("btn").html("View").click(function() {
 								let messageIndex = parseInt($(this).parent().parent().attr("data-message-index"));
 								let jsonData = allWhatsAppMessages[messageIndex];

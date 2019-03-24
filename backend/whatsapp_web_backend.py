@@ -94,10 +94,11 @@ class WhatsAppWeb(WebSocket):
                         self.sendJSON({"type": "resource_disconnected", "resource": "whatsapp",
                                        "resource_instance_id": obj["whatsapp_instance_id"]}, tag)
                     elif cmd == "backend-sendTextMessage":
-                        currWhatsAppInstance.sendTextMessage(obj["number"], obj["text"])
+                        currWhatsAppInstance.sendTextMessage(
+                            obj["number"], obj["text"])
                         # currWhatsAppInstance.sendTextMessage(obj["number"], obj["text"]);
                         self.sendJSON({"type": "message_sent", "resource": "whatsapp",
-                           "resource_instance_id": obj["whatsapp_instance_id"]}, tag)
+                                       "resource_instance_id": obj["whatsapp_instance_id"]}, tag)
         except:
             eprint(traceback.format_exc())
 
