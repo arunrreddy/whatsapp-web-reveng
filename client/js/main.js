@@ -236,7 +236,7 @@ $(document).ready(function() {
             websocket: apiWebsocket,
             request: {
                 type: "call",
-                callArgs: { command: "backend-sendTextMessage", number: "918660162298", text: "Hello there!"}
+                callArgs: { command: "backend-sendTextMessage", number: "{number}", text: "Hello there!"}
             }
         }).run(apiInfo.timeout)
         .then(() => {
