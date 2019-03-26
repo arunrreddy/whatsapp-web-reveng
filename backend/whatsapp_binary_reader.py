@@ -1,6 +1,5 @@
 from whatsapp_defines import WATags, WASingleByteTokens, WADoubleByteTokens, WAWebMessageInfo
 
-
 class WABinaryReader:
     def __init__(self, data):
         self.data = data
@@ -25,6 +24,9 @@ class WABinaryReader:
         self.index += n
         return ret
 
+    def readInt8(self, littleEndian=False):
+        return self.readIntN(1, littleEndian)
+
     def readInt16(self, littleEndian=False):
         return self.readIntN(2, littleEndian)
 
@@ -48,7 +50,7 @@ class WABinaryReader:
             currByte = self.readByte()
             ret += self.unpackByte(tag, (currByte & 0xF0)
                                    >> 4) + self.unpackByte(tag, currByte & 0x0F)
-        if (startByte >> 7) == 0:
+        if (startByte >> 7) != 0:
             ret = ret[:len(ret)-1]
         return ret
 
@@ -57,6 +59,7 @@ class WABinaryReader:
             return self.unpackNibble(value)
         elif tag == WATags.HEX_8:
             return self.unpackHex(value)
+        raise ValueError("unpackByte with unknown tag: ", tag)
 
     def unpackNibble(self, value):
         if value >= 0 and value <= 9:
@@ -66,7 +69,7 @@ class WABinaryReader:
         elif value == 11:
             return "."
         elif value == 15:
-            return "\0"
+            return "\x00"
         raise ValueError("invalid nibble to unpack: " + value)
 
     def unpackHex(self, value):
@@ -80,7 +83,7 @@ class WABinaryReader:
     def readRangedVarInt(self, minVal, maxVal, desc="unknown"):
         ret = self.readVarInt()
         if ret < minVal or ret >= maxVal:
-            raise ValueError("varint for " + desc +
+            raise ValueError("variant for " + desc +
                              " is out of bounds: " + str(ret))
         return ret
 
@@ -91,24 +94,24 @@ class WABinaryReader:
         if(tag == WATags.LIST_EMPTY):
             return 0
         elif(tag == WATags.LIST_8):
-            return self.readByte()
+            return self.readInt8(False)
         elif(tag == WATags.LIST_16):
-            return self.readInt16()
+            return self.readInt16(False)
         raise ValueError("invalid tag for list size: " + str(tag))
 
     def readString(self, tag):
-        if tag >= 3 and tag <= 235:
+        if tag >= 3 and tag <= len(WASingleByteTokens):
             token = self.getToken(tag)
             if token == "s.whatsapp.net":
                 token = "c.us"
             return token
 
         if tag == WATags.DICTIONARY_0 or tag == WATags.DICTIONARY_1 or tag == WATags.DICTIONARY_2 or tag == WATags.DICTIONARY_3:
-            return self.getTokenDouble(tag - WATags.DICTIONARY_0, self.readByte())
+            return self.getTokenDouble(tag - WATags.DICTIONARY_0, self.readInt8(False))
         elif tag == WATags.LIST_EMPTY:
             return
         elif tag == WATags.BINARY_8:
-            return self.readStringFromChars(self.readByte())
+            return self.readStringFromChars(self.readInt8())
         elif tag == WATags.BINARY_20:
             return self.readStringFromChars(self.readInt20())
         elif tag == WATags.BINARY_32:
@@ -135,8 +138,8 @@ class WABinaryReader:
         if n == 0:
             return
         for i in range(n):
-            index = self.readString(self.readByte())
-            ret[index] = self.readString(self.readByte())
+            index = self.readString(self.readInt8())
+            ret[index] = self.readString(self.readInt8())
         return ret
 
     def readList(self, tag):
@@ -146,8 +149,8 @@ class WABinaryReader:
         return ret
 
     def readNode(self):
-        listSize = self.readListSize(self.readByte())
-        descrTag = self.readByte()
+        listSize = self.readListSize(self.readInt8())
+        descrTag = self.readInt8(False)
         if descrTag == WATags.STREAM_END:
             raise ValueError("unexpected stream end")
         descr = self.readString(descrTag)
@@ -157,11 +160,11 @@ class WABinaryReader:
         if listSize % 2 == 1:
             return [descr, attrs, None]
 
-        tag = self.readByte()
+        tag = self.readInt8(False)
         if self.isListTag(tag):
             content = self.readList(tag)
         elif tag == WATags.BINARY_8:
-            content = self.readBytes(self.readByte())
+            content = self.readBytes(self.readInt8())
         elif tag == WATags.BINARY_20:
             content = self.readBytes(self.readInt20())
         elif tag == WATags.BINARY_32:

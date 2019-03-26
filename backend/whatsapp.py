@@ -310,9 +310,9 @@ class WhatsAppWebClient:
         eprint("Sending message to " + number)
         messageId = "3EB0" + \
             binascii.hexlify(Crypto.Random.get_random_bytes(8)).upper()
-        messageTag = str(getTimestamp())
+        messageTag = str(getTimestamp()) + str(os.urandom(10))
         messageParams = {"key": {"fromMe": True, "remoteJid": number + "@s.whatsapp.net", "id": messageId},
-                         "messageTimestamp": str(getTimestamp()), "status": 1, "message": {"conversation": text}}
+                         "messageTimestamp": getTimestamp(), "status": 0, "message": {"conversation": text}}
         eprint("Message params", messageParams)
         msgData = ["action", {"type": "relay", "epoch": str(self.messageSentCount)}, [
             ["message", None, WAWebMessageInfo.encode(messageParams)]]]

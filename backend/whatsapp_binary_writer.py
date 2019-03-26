@@ -21,6 +21,9 @@ class WABinaryWriter:
         self.pushBytes(
             [(value >> 16) & 0x0F, (value >> 8) & 0xFF, value & 0xFF])
 
+    def pushInt8(self, value):
+        self.pushIntN(value, 1)
+
     def pushInt16(self, value):
         self.pushIntN(value, 2)
 
@@ -144,7 +147,7 @@ class WABinaryWriter:
     def writePackedBytes(self, strng):
         try:
             self.writePackedBytesImpl(strng, WATags.NIBBLE_8)
-        except e:
+        except:
             self.writePackedBytesImpl(strng, WATags.HEX_8)
 
     def writePackedBytesImpl(self, strng, dataType):

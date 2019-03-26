@@ -1,6 +1,7 @@
 from google.protobuf import json_format
 import json
 import whatsapp_protobuf_pb2
+from utilities import *
 
 
 class WATags:
@@ -130,6 +131,9 @@ class WAWebMessageInfo:
     def decode(data):
         msg = whatsapp_protobuf_pb2.WebMessageInfo()
         msg.ParseFromString(data)
+        eprint('Encoded Data: ', data)
+        eprint('Decoded Data: ', msg)
+        eprint('Json Data: ', json.loads(json_format.MessageToJson(msg)))
         return json.loads(json_format.MessageToJson(msg))
 
     @staticmethod

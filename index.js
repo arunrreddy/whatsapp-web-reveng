@@ -109,7 +109,6 @@ function createConnection() {
         condition: obj => obj.from =="client" && obj.type == "call" && obj.command == "backend-sendTextMessage",
         keepWhenHit: true,
     }).then(clientCallRequest => {
-        console.log('Comming here');
         if(!backendWebsocket.isOpen) {
             clientCallRequest.respond({ type: 'error', reason: 'No backend connected' });
             return;
@@ -118,7 +117,7 @@ function createConnection() {
             websocket: backendWebsocket,
             request: {
                 type: 'call',
-                callArgs: { command: 'backend-sendTextMessage', number: '917899663241', text: 'Hello there', whatsapp_instance_id: backendWebsocket.activeWhatsAppInstanceId }
+                callArgs: { command: 'backend-sendTextMessage', number: '917899663241', text: 'Hello there from server', whatsapp_instance_id: backendWebsocket.activeWhatsAppInstanceId }
             }
         }).run(backendInfo.timeout).then(backendResponse => {
             clientCallRequest.respond({ type: "resource_disconnected", resource: "whatsapp" });

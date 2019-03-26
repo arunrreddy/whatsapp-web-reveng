@@ -67,3 +67,6 @@ doc/spec/protobuf-extractor/node_modules
 
 # direnv environment
 .envrc
+
+#python binary files
+*.pyc
