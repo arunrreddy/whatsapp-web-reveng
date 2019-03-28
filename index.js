@@ -14,7 +14,7 @@ let { BootstrapStep }   = require("./client/js/BootstrapStep.js");
 console.log("whatsapp-web-reveng API server listening on port 2019");
 
 let backendInfo = {
-	url: "ws://192.168.1.7:2020",
+	url: "ws://localhost:2020",
 	timeout: 10000
 };
 

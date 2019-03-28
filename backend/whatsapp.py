@@ -278,7 +278,7 @@ class WhatsAppWebClient:
 
     def generateQRCode(self, callback=None):
         self.loginInfo["clientId"] = base64.b64encode(os.urandom(16))
-        messageTag = str(getTimestamp())
+        messageTag = str(binascii.hexlify(bytearray(os.urandom(10))).upper())
         self.messageQueue[messageTag] = {
             "desc": "_login", "callback": callback}
         message = messageTag + ',["admin","init",[0,3,1649],["Chromium at ' + datetime.datetime.now(
@@ -286,12 +286,12 @@ class WhatsAppWebClient:
         self.activeWs.send(message)
 
     def restoreSession(self, callback=None):
-        messageTag = str(getTimestamp())
+        messageTag = str(binascii.hexlify(bytearray(os.urandom(10))).upper())
         message = messageTag + ',["admin","init",[0,3,1649],["Chromium at ' + datetime.now(
         ).isoformat() + '","Chromium"],"' + self.loginInfo["clientId"] + '",true]'
         self.activeWs.send(message)
 
-        messageTag = str(getTimestamp())
+        messageTag = str(binascii.hexlify(bytearray(os.urandom(10))).upper())
         self.messageQueue[messageTag] = {"desc": "_restoresession"}
         message = messageTag + ',["admin","login","' + self.connInfo["clientToken"] + '", "' + self.connInfo[
             "serverToken"] + '", "' + self.loginInfo["clientId"] + '", "takeover"]'
@@ -310,7 +310,7 @@ class WhatsAppWebClient:
         eprint("Sending message to " + number)
         messageId = "3EB0" + \
             binascii.hexlify(Crypto.Random.get_random_bytes(8)).upper()
-        messageTag = str(getTimestamp()) + str(os.urandom(10))
+        messageTag = str(binascii.hexlify(bytearray(os.urandom(10))).upper())
         messageParams = {"key": {"fromMe": True, "remoteJid": number + "@s.whatsapp.net", "id": messageId},
                          "messageTimestamp": getTimestamp(), "status": 0, "message": {"conversation": text}}
         eprint("Message params", messageParams)

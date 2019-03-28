@@ -26,7 +26,7 @@ $(document).ready(function() {
 
 
 	let apiInfo = {
-		url: 'ws://192.168.1.7:2019', // TODO: Read from a config maybe
+		url: 'ws://localhost:2019', // TODO: Read from a config maybe
  		timeout: 10000,
 		errors: {
 			basic: {

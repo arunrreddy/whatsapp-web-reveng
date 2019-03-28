@@ -28,7 +28,6 @@ class WhatsAppWeb(WebSocket):
     def sendJSON(self, obj, tag=None):
         if "from" not in obj:
             obj["from"] = "backend"
-        eprint("sending " + json.dumps(obj))
         if tag is None:
             tag = str(getTimestampMs())
         self.sendMessage(tag + "," + json.dumps(obj))

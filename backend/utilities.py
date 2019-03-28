@@ -9,7 +9,6 @@ def eprint(*args, **kwargs):							# from https://stackoverflow.com/a/14981125
 
 
 def getTimestamp():
-    eprint('Timestamp returned', int(time.time()))
     return int(time.time())
 
 
@@ -45,7 +44,7 @@ def getNumValidKeys(obj):
 
 def encodeUTF8(s):
     if not isinstance(s, str):
-        s = string.encode("utf-8")
+        s = s.encode("utf-8")
     return s
 
 

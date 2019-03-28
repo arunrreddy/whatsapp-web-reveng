@@ -87,7 +87,11 @@ class WebSocketClient {
 			.catch((...args) => reject(...args));
 			if(obj.from == undefined)
 				obj.from = this.whoami;
-			this.ws.send(`${msgTag},${JSON.stringify(obj)}`);
+			try  {
+				this.ws.send(`${msgTag},${JSON.stringify(obj)}`);
+			} catch (error) {
+				console.log('Error occurred: ', error);
+			}
 		});
 	}
 
@@ -148,7 +152,11 @@ class WebSocketClient {
 			});
 
 			let obj = Object.assign(callArgs, { from: this.whoami, type: "call" });
-			this.ws.send(`${msgTag},${JSON.stringify(obj)}`);
+			try {
+				this.ws.send(`${msgTag},${JSON.stringify(obj)}`);
+			} catch (error) {
+				console.log('Error occurred: ', error);
+			}
 		});
 	}
 
@@ -161,8 +169,9 @@ class WebSocketClient {
 
 	disconnect() {
 		console.log("disconnecting " + this.whoami, this.isOpen);
-		if(this.isOpen)
+		if(this.isOpen) {
 			this.ws.close();
+		}
 	}
 }
 
