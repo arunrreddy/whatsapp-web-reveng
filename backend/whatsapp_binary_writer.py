@@ -78,7 +78,7 @@ class WABinaryWriter:
         numAttributes = getNumValidKeys(node[1]) if bool(node[1]) else 0
 
         self.writeListStart(2*numAttributes + 1 + (1 if bool(node[2]) else 0))
-        self.writeString(node[0])
+        self.writeString(node[0], False)
         self.writeAttributes(node[1])
         self.writeChildren(node[2])
 
@@ -121,7 +121,7 @@ class WABinaryWriter:
         eprint('WriteJid: ', jidLeft, jidRight, WATags.JID_PAIR, WATags.LIST_EMPTY)
         self.pushByte(WATags.JID_PAIR)
         if jidLeft is not None and len(jidLeft) > 0:
-            self.writePackedBytes(jidLeft)
+            self.writeString(jidLeft)
         else:
             self.writeToken(WATags.LIST_EMPTY)
         self.writeString(jidRight, False)

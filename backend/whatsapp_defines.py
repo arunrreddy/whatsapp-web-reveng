@@ -140,4 +140,6 @@ class WAWebMessageInfo:
     def encode(msg):
         data = json_format.Parse(json.dumps(
             msg), whatsapp_protobuf_pb2.WebMessageInfo(), ignore_unknown_fields=True)
+        eprint('Encoded Data: ', data)
+        eprint('Serialized Data: ', data.SerializeToString())
         return data.SerializeToString()
