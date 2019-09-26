@@ -96,6 +96,15 @@ class WAMetrics:
     CALL = 37
     QUERY_CALL = 38
     QUERY_QUICK_REPLIES = 39
+    QUERY_CALL_OFFER        = 40
+    QUERY_RESPONSE          = 41
+    QUERY_STICKER_PACKS     = 42
+    QUERY_STICKERS          = 43
+    ADD_OR_REMOVE_LABELS    = 44
+    QUERY_NEXT_LABEL_COLOR  = 45
+    QUERY_LABEL_PALETTE     = 46
+    CREATE_OR_DELETE_LABELS = 47
+    EDIT_LABELS             = 48
 
     @staticmethod
     def get(str):
@@ -117,6 +126,7 @@ class WAFlags:
 
 class WAMediaAppInfo:
     imageMessage = "WhatsApp Image Keys"
+    stickerMessage  = "WhatsApp Image Keys"
     videoMessage = "WhatsApp Video Keys"
     audioMessage = "WhatsApp Audio Keys"
     documentMessage = "WhatsApp Document Keys"

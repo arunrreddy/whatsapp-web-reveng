@@ -281,13 +281,13 @@ class WhatsAppWebClient:
         messageTag = str(getTimestamp())
         self.messageQueue[messageTag] = {
             "desc": "_login", "callback": callback}
-        message = messageTag + ',["admin","init",[0,3,1649],["Chromium at ' + datetime.datetime.now(
+        message = messageTag + ',["admin","init",[0,3,2390],["Chromium at ' + datetime.datetime.now(
         ).isoformat() + '","Chromium"],"' + self.loginInfo["clientId"] + '",true]'
         self.activeWs.send(message)
 
     def restoreSession(self, callback=None):
         messageTag = str(getTimestamp())
-        message = messageTag + ',["admin","init",[0,3,1649],["Chromium at ' + datetime.now(
+        message = messageTag + ',["admin","init",[0,3,2390],["Chromium at ' + datetime.now(
         ).isoformat() + '","Chromium"],"' + self.loginInfo["clientId"] + '",true]'
         self.activeWs.send(message)
 
